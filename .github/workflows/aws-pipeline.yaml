@@ -25,10 +25,12 @@ jobs:
         ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
         ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
         IMAGE_TAG: ${{ github.sha }}
-        API_KEY: ${{ secrets.OPENAI_API_KEY }} ]
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       run: |
         docker build --build-arg OPENAI_API_KEY=$OPENAI_API_KEY -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG | tee push-output.txt
+        export DIGEST=$(grep "digest: sha256:" push-output.txt | awk '{print $3}')
+        echo "DIGEST=$DIGEST" >> $GITHUB_ENV
 
     - name: Image digest
-      run: echo "Image digest: ${{ steps.build.outputs.digest }}"
+      run: echo "Image digest: ${{ env.DIGEST }}"
