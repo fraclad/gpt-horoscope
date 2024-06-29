@@ -1,0 +1,5 @@
+venv_*/
+misc/
+cache/
+.DS_Store
+gitignore_*

@@ -1,0 +1,1 @@
+today date is {date}. My zodiac is {zodiac}. create a brief horoscope for me today and tomorrow. format in markdown. 
