@@ -32,5 +32,3 @@ jobs:
         export DIGEST=$(grep "digest: sha256:" push-output.txt | awk '{print $3}')
         echo "DIGEST=$DIGEST" >> $GITHUB_ENV
 
-    - name: Image digest
-      run: echo "Image digest: ${{ env.DIGEST }}"
