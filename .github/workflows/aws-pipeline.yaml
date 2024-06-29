@@ -15,7 +15,7 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -33,7 +33,12 @@ jobs:
         IMAGE_TAG: ${{ github.sha }}
       run: |
         docker build --build-arg OPENAI_API_KEY=$OPENAI_API_KEY -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG | tee push-output.txt
-        export DIGEST=$(grep "digest: sha256:" push-output.txt | awk '{print $3}')
-        echo "DIGEST=$DIGEST" >> $GITHUB_ENV
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG 
 
+    - name: Update Lambda function
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+          LAMBDA_FUNCTION_NAME: ${{ secrets.LAMBDA_FUNCTION_NAME }}
+        run: |
+          aws lambda update-function-code --function-name $LAMBDA_FUNCTION_NAME --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --region $AWS_REGION
